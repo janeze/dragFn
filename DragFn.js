@@ -52,6 +52,7 @@
          /*******必传参数*********/
          this.container = options.container; //拖曳范围
          this.dragItemCls = options.dragItemCls; //可拖曳的元素样式
+         this.isAdd=options.isAdd;//是否是从外部添加元素
          /*******选传参数*********/
          this.replaceInSameParentNode = options.replaceInSameParentNode === false ? false : true; //是否只能替换同一个父元素内的元素,默认为是
          this.replaceItemCls = options.replaceItemCls; //可替换位置的元素样式
@@ -95,16 +96,24 @@
              this.setDraggable(); //设置可拖曳元素
              //dragstart -> drag -> dragenter -> dragover ->  dragleave  -> drop -> dragend
              for (var i = 0; i < this.onBindFnName.length; i++) {
-                 var evtName = this.onBindFnName[i];
-                 this.onBindFn.push(this[evtName].call(this));
-                 this.container.addEventListener(evtName, this.onBindFn[i], false);
+                var evtName = this.onBindFnName[i];
+                this.onBindFn.push(this[evtName].call(this));
+                if(this.isAdd&&["dragstart", "drag", "dragend"].indexOf(evtName)>-1){
+                    document.getElementsByClassName(this.dragItemCls)[0].addEventListener(evtName, this.onBindFn[i], false);
+                }else{
+                    this.container.addEventListener(evtName, this.onBindFn[i], false);
+                }
              }
              //当前拖曳事件绑定在父元素上，若事件触发时使用了stopPropagation，会导致外层绑定拖曳事件的父元素不能被拖曳
          },
          unbind: function() {
              for (var i = 0; i < this.onBindFnName.length; i++) {
-                 var evtName = this.onBindFnName[i];
-                 this.container.removeEventListener(evtName, this.onBindFn[i], false);
+                var evtName = this.onBindFnName[i];
+                if(this.isAdd&&["dragstart", "drag", "dragend"].indexOf(evtName)>-1){
+                    document.getElementsByClassName(this.dragItemCls)[0].removeEventListener(evtName, this.onBindFn[i], false);
+                }else{
+                    this.container.removeEventListener(evtName, this.onBindFn[i], false);
+                }
              }
              this.releaseDraggable();
          },
@@ -325,9 +334,11 @@
                  that.draggingEle = draggingEle;
                  that.saveDraggingStyle();
                  that.draggingEle.classList.add(that.draggingCls);
-                 setTimeout(function() {
-                     that.draggingEle.style.display = "none";
-                 }, 0);
+                 if(!that.isAdd){
+                     setTimeout(function() {
+                         that.draggingEle.style.display = "none";
+                     }, 0);
+                 }
                  //  e.stopPropagation();
              };
          },
@@ -449,6 +460,12 @@
      function DragFn(options) {
          var DragArr = [];
          var contains = options.container;
+         //遍历参数
+         for(var o in options){
+            if(typeof options[o]==="function"){//将方法事件传入
+                this[o]=options[o];
+            }
+         }
          if (!contains) {
              return;
          }
