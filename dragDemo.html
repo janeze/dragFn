@@ -1,0 +1,150 @@
+<meta charset="utf-8">
+<style>
+.panel-list {
+    overflow: hidden;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.panel-item {
+    float: left;
+    margin-right: 30px;
+    width: 100%;
+    height: 50px;
+    background: #eee;
+    border: 1px solid #ddd;
+    cursor: move;
+}
+
+.panel-item.h {
+    height: 100px;
+}
+
+.inner-item {
+    display: inline-block;
+    height: 50%;
+    margin: 0 3px;
+    border: 1px solid red;
+}
+
+.drag-ele-placeholder {
+    border: 1px dashed #aaa !important;
+    background-color: #92d6f9;
+}
+
+.drag-ele-placeholder.is-blank-placeholder {
+    background-color: #fff;
+}
+
+.drag-ele-dragging {
+    opacity: 1;
+    background-color: #92d6f9;
+    /*z-index: -1000;*/
+}
+
+[draggable=true] {
+    /*在Safari4下则需要借助CSS规则来启动DnD功能*/
+    -webkit-user-drag: element;
+}
+
+
+/*布局*/
+
+.ui-layout-box {
+    position: relative;
+    display: table;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ddd;
+    width: 100%;
+}
+
+.ui-layout-item {
+    display: inline-block;
+    min-height: 40px;
+    border: 1px solid #ddd;
+    margin: 20px 0;
+    padding: 20px;
+    width: 50%;
+    box-sizing: border-box;
+    float: left;
+}
+</style>
+<div class="body">
+    <div class="ui-layout-box ui-drag-cls">
+        <div class="ui-layout-item"></div>
+        <div class="ui-layout-item"></div>
+    </div>
+    <div class="ui-layout-box ui-drag-cls">
+        <div class="ui-layout-item"></div>
+        <div class="ui-layout-item"></div>
+    </div>
+    <div class="panel-item h ui-drag-cls" data-index="1">
+        <div style="height:60%">一
+            <span class="inner-item">111111</span>
+            <span class="inner-item">2222222</span>
+            <span class="inner-item">3333333</span>
+            <span class="inner-item">4444</span>
+            <span class="inner-item">55555</span>
+        </div>
+    </div>
+    <div class="panel-item ui-drag-cls" data-index="2">
+        <div style="height:100%">二
+            <span class="inner-item">111111</span>
+            <span class="inner-item">2222222</span>
+            <span class="inner-item">3333333</span>
+            <span class="inner-item">4444</span>
+            <span class="inner-item">55555</span>
+        </div>
+    </div>
+    <div class="panel-item ui-drag-cls" data-index="3">
+        <div style="height:100%">三
+            <span class="inner-item">111111</span>
+            <span class="inner-item">2222222</span>
+            <span class="inner-item">3333333</span>
+            <span class="inner-item">4444</span>
+            <span class="inner-item">55555</span>
+        </div>
+    </div>
+    <div class="panel-item ui-drag-cls" data-index="4">
+        <div style="height:100%">四
+            <span class="inner-item">111111</span>
+            <span class="inner-item">2222222</span>
+            <span class="inner-item">3333333</span>
+            <span class="inner-item">4444</span>
+            <span class="inner-item">55555</span>
+        </div>
+    </div>
+    <div class="panel-item ui-drag-cls" data-index="5">
+        <div style="height:100%">五
+            <span class="inner-item">111111</span>
+            <span class="inner-item">2222222</span>
+            <span class="inner-item">3333333</span>
+            <span class="inner-item">4444</span>
+            <span class="inner-item">55555</span>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./DragFn.js"></script>
+<script>
+(function() {
+    new DragFn({
+        container: document.querySelectorAll(".ui-drag-cls"),
+        replaceItemCls: "inner-item",
+        dragItemCls: "inner-item",
+        isBlankPlaceholder: true,
+        horizontal: true,
+    });
+    new DragFn({
+        container: document.querySelector(".body"),
+        createItemCls: "ui-layout-item",
+        replaceItemCls: "ui-drag-cls",
+        dragItemCls: "ui-drag-cls",
+        isBlankPlaceholder: true,
+        horizontal: false,
+        replaceInSameParentNode:false
+    });
+}());
+</script>
