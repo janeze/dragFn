@@ -99,7 +99,7 @@
                 var evtName = this.onBindFnName[i];
                 this.onBindFn.push(this[evtName].call(this));
                 if(this.isAdd&&["dragstart", "drag", "dragend"].indexOf(evtName)>-1){
-                    document.getElementsByClassName(this.dragItemCls)[0].addEventListener(evtName, this.onBindFn[i], false);
+                    this.setOuterEleEvent("addEventListener",evtName,this.onBindFn[i]);
                 }else{
                     this.container.addEventListener(evtName, this.onBindFn[i], false);
                 }
@@ -110,12 +110,22 @@
              for (var i = 0; i < this.onBindFnName.length; i++) {
                 var evtName = this.onBindFnName[i];
                 if(this.isAdd&&["dragstart", "drag", "dragend"].indexOf(evtName)>-1){
-                    document.getElementsByClassName(this.dragItemCls)[0].removeEventListener(evtName, this.onBindFn[i], false);
+                   	this.setOuterEleEvent("removeEventListener",evtName,this.onBindFn[i]);
                 }else{
                     this.container.removeEventListener(evtName, this.onBindFn[i], false);
                 }
              }
              this.releaseDraggable();
+         },
+         setOuterEleEvent:function(eventName,dragEvtName,fn){
+         	var eles=document.getElementsByClassName(this.dragItemCls);
+         	for(var i=0;i<eles.length;i++){
+         		var ele=eles[i];
+         		if(ele.getAttribute("draggable")==="true"){
+         			ele[eventName](dragEvtName,fn , false);
+         		}
+         	}
+         	
          },
          destroy: function() {
              this.unbind();
@@ -126,7 +136,8 @@
              this.indexArray = [];
              var sub = 0;
              for (var i = 0; i < srcs.length; i++) {
-                 if (srcs[i].className.indexOf(this.placeholderCls) > 0) {
+             	var className=srcs[i].getAttribute("class");
+                 if (className.indexOf(this.placeholderCls) > 0) {
                      sub += -1;
                      continue;
                  }
@@ -234,7 +245,7 @@
          doDrop: function(e) {
              var that = this;
              var parentNode;
-             if (e.target === that.contains) {
+             if (e.target === that.container) {
                  parentNode = e.target;
              } else {
                  parentNode = e.target.parentElement
@@ -283,24 +294,25 @@
              return target;
          },
          isDropAllowed: function(target) {
-             if (target.className.indexOf(this.replaceItemCls) < 0) { //可替换位置的元素
+         	var targetClassName=target.getAttribute("class");
+             if (targetClassName.indexOf(this.replaceItemCls) < 0) { //可替换位置的元素
                  return false;
              }
              if (this.replaceInSameParentNode && this.draggingEle.parentElement !== target.parentElement) { //是否只能替换同一个父元素内的元素
                  return false;
              }
-             if(!this.draggingEle||this.draggingEle.className.indexOf(this.dragItemCls)<0){
+             if(!this.draggingEle||this.draggingEle.getAttribute("class").indexOf(this.dragItemCls)<0){
                 return false;
              }
              return true;
          },
          isAddEleAllowed:function(target){
-	            var className=target.className;
+	            var className=target.getAttribute("class");
 	            if(className.indexOf(this.createItemCls)<0){//可新增元素的元素样式位置
 	                return false;
 	            }
 	            var draggingEle=this.draggingEle;
-	            if(!draggingEle||draggingEle.className.indexOf(this.dragItemCls)<0){
+	            if(!draggingEle||draggingEle.getAttribute("class").indexOf(this.dragItemCls)<0){
 	                return false;
 	            }
 
@@ -369,8 +381,9 @@
                  	that.isDoInsert=true;
                     that.removePlaceholder();
                     that.insertPlaceholder(e.target, false,true);
-                    if (that.container.className.indexOf(that.dragoverCls) < 0) {
-                         that.container.className = that.container.className.trim() + " " + that.dragoverCls;
+                    if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
+                        var className= that.container.getAttribute("class").trim() + " " + that.dragoverCls;
+                     	that.container.setAttribute("class",className);
                      }
                     e.preventDefault();
                     return;
@@ -397,8 +410,9 @@
                  	that.isDoInsert=false;
                      that.removePlaceholder();
                      that.insertPlaceholder(target, isInFistHalf);
-                     if (that.container.className.indexOf(that.dragoverCls) < 0) {
-                         that.container.className = that.container.className.trim() + " " + that.dragoverCls;
+                     if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
+                         var className = that.container.getAttribute("class").trim() + " " + that.dragoverCls;
+                    	that.container.setAttribute("class",className);
                      }
                  }
                  
@@ -414,9 +428,10 @@
                  if (e.target === that.placeholderEle) {
                      return;
                  }
-                 that.container.className = that.container.className.replace(that.dragoverCls, "").trim();
+                 var className = that.container.getAttribute("class").replace(that.dragoverCls, "").trim();
+                 that.container.setAttribute("class",className);
                  setTimeout(function() {
-                     if (that.container.className.indexOf(that.dragoverCls) < 0) {
+                     if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
                          // that.removePlaceholder();
                      }
                  }, 100);
