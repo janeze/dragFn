@@ -260,13 +260,13 @@
 
              var placeholderEleIndexEle = this.placeholderEle.previousElementSibling;
              var replaceSortIndex, replaceIndex;
-             if (!this.isInFistHalf) {
+             if (this.isInFistHalf&&!placeholderEleIndexEle) {
+                 this.indexArray.unshift(draggingSortIndex);
+              } else {
                  replaceSortIndex = placeholderEleIndexEle.getAttribute("drag-index");
                  replaceSortIndex = Number(replaceSortIndex);
                  replaceIndex = this.indexArray.indexOf(replaceSortIndex);
                  this.indexArray.splice(replaceIndex, 1, replaceSortIndex, draggingSortIndex);
-             } else {
-                 this.indexArray.unshift(draggingSortIndex);
              }
          },
          isInDraggableChildren: function(e) {
