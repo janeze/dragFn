@@ -260,7 +260,10 @@
 
              var placeholderEleIndexEle = this.placeholderEle.previousElementSibling;
              var replaceSortIndex, replaceIndex;
-             if (this.isInFistHalf&&!placeholderEleIndexEle) {
+             var placeholderEleIndexEleClass=(placeholderEleIndexEle.getAttribute("class")||"").split(/\s+/g);
+             var sureInFistHalf=!placeholderEleIndexEle||placeholderEleIndexEleClass.indexOf(this.replaceItemCls)===-1;
+            
+             if (this.isInFistHalf&&sureInFistHalf) {
                  this.indexArray.unshift(draggingSortIndex);
               } else {
                  replaceSortIndex = placeholderEleIndexEle.getAttribute("drag-index");
