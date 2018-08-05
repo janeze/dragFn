@@ -1,4 +1,4 @@
- (function(global, functionName, factory) {
+; (function(global, functionName, factory) {
      typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
          typeof define === 'function' && define.amd ? define(functionName, [], factory) :
          (global[functionName] = factory());
@@ -110,7 +110,7 @@
              for (var i = 0; i < this.onBindFnName.length; i++) {
                 var evtName = this.onBindFnName[i];
                 if(this.isAdd&&["dragstart", "drag", "dragend"].indexOf(evtName)>-1){
-                   	this.setOuterEleEvent("removeEventListener",evtName,this.onBindFn[i]);
+                    this.setOuterEleEvent("removeEventListener",evtName,this.onBindFn[i]);
                 }else{
                     this.container.removeEventListener(evtName, this.onBindFn[i], false);
                 }
@@ -118,14 +118,14 @@
              this.releaseDraggable();
          },
          setOuterEleEvent:function(eventName,dragEvtName,fn){
-         	var eles=document.getElementsByClassName(this.dragItemCls);
-         	for(var i=0;i<eles.length;i++){
-         		var ele=eles[i];
-         		if(ele.getAttribute("draggable")==="true"){
-         			ele[eventName](dragEvtName,fn , false);
-         		}
-         	}
-         	
+            var eles=document.getElementsByClassName(this.dragItemCls);
+            for(var i=0;i<eles.length;i++){
+                var ele=eles[i];
+                if(ele.getAttribute("draggable")==="true"){
+                    ele[eventName](dragEvtName,fn , false);
+                }
+            }
+            
          },
          destroy: function() {
              this.unbind();
@@ -136,7 +136,7 @@
              this.indexArray = [];
              var sub = 0;
              for (var i = 0; i < srcs.length; i++) {
-             	var className=srcs[i].getAttribute("class");
+                var className=srcs[i].getAttribute("class");
                  if (className.indexOf(this.placeholderCls) > 0) {
                      sub += -1;
                      continue;
@@ -215,8 +215,13 @@
          },
          insertPlaceholder: function(target, isInFistHalf,isAppend) {
              var that = this;
+             if(!this.placeholderEle){
+                return;
+             }
              if(isAppend){
-                target.append(this.placeholderEle);
+                if(!target.contains(this.placeholderEle)){
+                    target.append(this.placeholderEle);
+                }
                 return;
              }
              if (!target.parentElement) {
@@ -260,7 +265,8 @@
 
              var placeholderEleIndexEle = this.placeholderEle.previousElementSibling;
              var replaceSortIndex, replaceIndex;
-             var placeholderEleIndexEleClass=(placeholderEleIndexEle.getAttribute("class")||"").split(/\s+/g);
+            
+             var placeholderEleIndexEleClass=(placeholderEleIndexEle&&placeholderEleIndexEle.getAttribute("class")||"").split(/\s+/g);
              var sureInFistHalf=!placeholderEleIndexEle||placeholderEleIndexEleClass.indexOf(this.replaceItemCls)===-1;
             
              if (this.isInFistHalf&&sureInFistHalf) {
@@ -297,7 +303,7 @@
              return target;
          },
          isDropAllowed: function(target) {
-         	var targetClassName=target.getAttribute("class");
+            var targetClassName=target.getAttribute("class");
              if (targetClassName.indexOf(this.replaceItemCls) < 0) { //可替换位置的元素
                  return false;
              }
@@ -309,21 +315,55 @@
              }
              return true;
          },
+         isInCreateItem:function(target){
+            var className=target.getAttribute("class");
+            if(className===null){
+                className="";
+            }
+            var createItemCls=this.createItemCls||"";
+            if(typeof createItemCls==="string"){
+                createItemCls=createItemCls.split(",");
+            }
+            if(createItemCls.length===0){
+                return false;
+            }
+            var len=createItemCls.length,cango;
+            for(var i=0;i<len;i++){
+                if(className.indexOf(createItemCls[i])!==-1){//可新增元素的元素样式位置
+                    cango=true;
+                    break;
+                }
+            }
+            if(!cango){
+                return false;
+            }else{
+                return true;
+            }
+         },
          isAddEleAllowed:function(target){
-	            var className=target.getAttribute("class");
-	            if(className.indexOf(this.createItemCls)<0){//可新增元素的元素样式位置
-	                return false;
-	            }
-	            var draggingEle=this.draggingEle;
-	            if(!draggingEle||draggingEle.getAttribute("class").indexOf(this.dragItemCls)<0){
-	                return false;
-	            }
+                var className=target.getAttribute("class");
+                if(className===null){
+                    className="";
+                }
+                //可新增元素的元素样式位置
+                if(this.createItemCls&&this.createItemCls.length>1){
+                    if(!this.isInCreateItem(target)){
+                        return false;
+                    }
+                }else if(className.indexOf(this.createItemCls)<0){
+                    return false;
+                }
+               
+                var draggingEle=this.draggingEle;
+                if(!draggingEle||draggingEle.getAttribute("class").indexOf(this.dragItemCls)<0){
+                    return false;
+                }
 
-	            var children=target.children;
-	            if(children.length>0){
-	                return false;
-	            }
-	            return true;
+                var children=target.children;
+                if(children.length>0){
+                    return false;
+                }
+                return true;
          },
          isMouseInFirstHalf: function(e) {
              var horizontal = this.horizontal, //是否横向
@@ -380,16 +420,18 @@
                  //默认行为是不允许被拖拽元素在其他元素上释放或放置（即无法触发 drop 事件），需要通过 event.preventDefault() 来阻止默认行为才能触发后续的 drop 事件
                  //场景一、当前位置元素可以插入placeholder
                  var isInsertEle=that.isAddEleAllowed(e.target);
-                 if(isInsertEle){
-                 	that.isDoInsert=true;
-                    that.removePlaceholder();
-                    that.insertPlaceholder(e.target, false,true);
-                    if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
-                        var className= that.container.getAttribute("class").trim() + " " + that.dragoverCls;
-                     	that.container.setAttribute("class",className);
+                 if(that.isInCreateItem(e.target)){
+                     if(isInsertEle){
+                        that.isDoInsert=true;
+                        that.removePlaceholder();
+                        that.insertPlaceholder(e.target, false,true);
+                        if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
+                            var className= that.container.getAttribute("class").trim() + " " + that.dragoverCls;
+                            that.container.setAttribute("class",className);
+                         }
+                        e.preventDefault();
+                        return;
                      }
-                    e.preventDefault();
-                    return;
                  }
                  //场景二、当前位置元素是插入的placeholder
                  if (e.target == that.placeholderEle) {
@@ -410,12 +452,12 @@
                  //场景五、当前位置可替换元素
                  var isInFistHalf = that.isMouseInFirstHalf(e);
                  if (target !== that.placeholderEle) {
-                 	that.isDoInsert=false;
+                    that.isDoInsert=false;
                      that.removePlaceholder();
                      that.insertPlaceholder(target, isInFistHalf);
-                     if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
-                         var className = that.container.getAttribute("class").trim() + " " + that.dragoverCls;
-                    	that.container.setAttribute("class",className);
+                     if ((that.container.getAttribute("class")||"").indexOf(that.dragoverCls) < 0) {
+                         var className = (that.container.getAttribute("class")||"").trim() + " " + that.dragoverCls;
+                        that.container.setAttribute("class",className);
                      }
                  }
                  
@@ -431,7 +473,7 @@
                  if (e.target === that.placeholderEle) {
                      return;
                  }
-                 var className = that.container.getAttribute("class").replace(that.dragoverCls, "").trim();
+                 var className = (that.container.getAttribute("class")||"").replace(that.dragoverCls, "").trim();
                  that.container.setAttribute("class",className);
                  setTimeout(function() {
                      if (that.container.getAttribute("class").indexOf(that.dragoverCls) < 0) {
@@ -446,7 +488,7 @@
                  //util.console.log("%cdrop:", "color:fuchsia", e.target);
                  if (that.placeholderEle && that.placeholderEle.parentElement) {
                      if(!that.isDoInsert){
-                     	that.setIndexArray(e);
+                        that.setIndexArray(e);
                      }
                      that.doDrop(e);
                      that.afterDrop(e);
